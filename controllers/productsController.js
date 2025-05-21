@@ -61,6 +61,13 @@ exports.getProductView = async (request, response) => {
   });
 };
 
+exports.addProduct = async (request, response) => {
+  await Product.add(request.body);
+  await Cart.add(request.body.name);
+
+  response.status(STATUS_CODE.FOUND).redirect("/products/new");
+};
+
 exports.deleteProduct = async (request, response) => {
   const name = request.params.name;
   await Product.deleteByName(name);
