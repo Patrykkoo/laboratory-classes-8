@@ -25,34 +25,30 @@ class Cart {
     }
   }
 
-  static async add(productName) {
+  static async add(product) {
     const db = getDatabase();
-
+  
+    if (!product || !product.name || !product.price) {
+      console.error("Invalid product object:", product);
+      return;
+    }
+  
     try {
-      const product = await Product.findByName(productName);
-
-      if (!product) {
-        throw Error(`Product '${productName}' not found`);
-      }
-
       const cart = await this.getCart();
-      const searchedProduct = cart.items.find(
-        (item) => item.product.name === productName
-      );
-
-      if (searchedProduct) {
-        searchedProduct.quantity += 1;
+      const existing = cart.items.find(item => item.product.name === product.name);
+  
+      if (existing) {
+        existing.quantity += 1;
       } else {
         cart.items.push({ product, quantity: 1 });
       }
-
-      await db
-        .collection(COLLECTION_NAME)
-        .updateOne({}, { $set: { items: cart.items } });
+  
+      await db.collection(COLLECTION_NAME).updateOne({}, { $set: { items: cart.items } });
     } catch (error) {
-      console.error("Error occurred while adding product to cart");
+      console.error("Error occurred while adding product to cart", error);
     }
   }
+  
 
   static async getItems() {
     try {
